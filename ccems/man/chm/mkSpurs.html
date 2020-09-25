@@ -1,0 +1,216 @@
+<html><head><title>Make Spur Model Space</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>mkSpurs(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   mkSpurs">
+<param name="keyword" value=" Make Spur Model Space">
+</object>
+
+
+<h2>Make Spur Model Space</h2>
+
+
+<h3>Description</h3>
+
+<p>
+This function takes <code>g</code> from <code>mkg</code> and maps it into a dataframe of spur graph model definitions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>mkSpurs(g,state=list(globMdlIndex=0,globCmbIndex=0,relCmbIndex=0,
+         config=NULL), maxnKjPs=NULL, maxTotalPs=NULL,minTotalPs=NULL, 
+         batchSize=500,doTights=FALSE,
+         atLeastOne=TRUE,atLeastOneOfEach=FALSE,
+         KIC=1,kIC=1,m1=-90,p=-1,forceM1=FALSE,forceP=FALSE) </pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>g</code></td>
+<td>
+The generic model output list of <code>mkg</code>. </td></tr>
+<tr valign="top"><td><code>state</code></td>
+<td>
+The current state of model space generation. This is a list with several components. 
+<code>globMdlIndex</code> is the global model space index. 
+When <code>mkSpurs</code> is called within <code>ems</code> the <code>globMdlIndex</code> of 
+the spurs begins where it ends for grids. 
+<code>globCmbIndex</code> is the global spur model index. 
+This index is used to trim the last <code>batchSize</code>, if needed, to avoid attempts
+to extend the spur space size beyond its upper limit of <code>2^g$nZ</code>. 
+<code>relCmbIndex</code> is the most critical component of the <code>state</code>. 
+This is the column number of
+the current matrix output of <code>combn</code>, i.e. it is a relative index.  
+The spur space <code>chunk</code> returned by <code>mkSpurs</code> begins just after this column. 
+<code>config</code> is a vector of the integer positions in <code>g$Z</code> of the 
+last model's finite K (i.e. the last model of the previous
+chunk). <code>config</code>  is 
+the <code>relCmbIndex</code>th column of the current <code>combn</code> matrix. 
+Its length is the current number of K parameters in the model unless <code>relCmbIndex=0</code>, 
+in which case the number of 
+parameters is one more than this 
+(in this case the end of the last batch coincides with the end of a <code>combn</code> matrix). </td></tr>
+<tr valign="top"><td><code>maxnKjPs</code></td>
+<td>
+The maximum number of Kj parameters of models in the model space. Full chunks 
+are created and then trimmed, so descreases in the value of this option will not solve 
+"out of memory" problems. </td></tr>
+<tr valign="top"><td><code>maxTotalPs</code></td>
+<td>
+This is the maximum number of freely estimated k or K parameters.  </td></tr>
+<tr valign="top"><td><code>minTotalPs</code></td>
+<td>
+The minimum number of parameters of models in the model space.
+If <code>NULL</code> no minimum is imposed. </td></tr>
+<tr valign="top"><td><code>batchSize</code></td>
+<td>
+This is the number of K infinity models fitted per batch. Chunk sizes 
+are bigger than this if <code>doTights</code> is <code>TRUE</code> and/or  
+if <code>pRows</code> is <code>TRUE</code>, and/or if activity parameter constraints
+split models further. Values less than ~1000 are recommended for 
+quad core 8 GB motherboards. </td></tr>
+<tr valign="top"><td><code>doTights</code></td>
+<td>
+This should be <code>TRUE</code> if infinitely tight binding models 
+of single edge spur graphs are to be created.</td></tr>
+<tr valign="top"><td><code>atLeastOne</code></td>
+<td>
+Leave <code>TRUE</code> if only models with at least one complex 
+of maximal size are to be considered. Set <code>FALSE</code> if there is no
+prior knowledge supportive of the assertion that the largest oligomer must be in the model.</td></tr>
+<tr valign="top"><td><code>atLeastOneOfEach</code></td>
+<td>
+Set <code>TRUE</code> if only models with at least one complex 
+of each oligomer size are to be considered. This is useful when the data are multivariate
+proportions (i.e. mass distribution data) and each j-mer is clearly present. </td></tr>
+<tr valign="top"><td><code>KIC</code></td>
+<td>
+The initial condition of all K parameters optimized. The default is <code>IC=1</code> (in uM). </td></tr>
+<tr valign="top"><td><code>kIC</code></td>
+<td>
+The initial condition of all k parameters optimized. The default is <code>kIC=1</code> (in 1/seconds per occupied active site). </td></tr>
+<tr valign="top"><td><code>m1</code></td>
+<td>
+The hub protein's monomer mass in kDa. 
+The default is 90 for the big (R1) subunit of ribonucleotide reductase (RNR).
+This only matters if the data is mass data. Negative numbers imply fixed values and
+positive numbers imply starting values to be fitted to the data.</td></tr>
+<tr valign="top"><td><code>p</code></td>
+<td>
+Probability that hub can oligomerize, i.e. is not damaged. 
+Set to a positive value if additional rows are to be added to the output dataframe to include models 
+with <code>p</code> freely estimated. Set negative to hold fixed. Value is the initial or fixed value.</td></tr>
+<tr valign="top"><td><code>forceM1</code></td>
+<td>
+Set <code>TRUE</code> to force all models to estimate M1, i.e. to not generate models with M1 fixed. </td></tr>
+<tr valign="top"><td><code>forceP</code></td>
+<td>
+Set <code>TRUE</code> to force all models to estimate p, i.e. to not generate models with fixed p. </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+This function is complicated by the fact that one readily runs out of memory 
+with 29 complexes and thus roughly 500,000,000 spur models (in this case 8 GB RAM 
+allows at most 16 bytes per model!).  
+Thus, chunks of the spur model space must be created, fitted and summarized in sizes 
+small enough to fit into memory. 
+As both an input and an output, <code>state</code> links successive calls to this function. 
+It keeps track of where we are in the spur graph model space and it allows searches through 
+the low parameter number models without first defining all of the higher
+parameter number models (and thus consuming all of the RAM in the process).
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+A list with components 
+</p>
+<table summary="R argblock">
+<tr valign="top"><td><code>chunk</code></td>
+<td>
+A dataframe where each row is a spur model. </td></tr>
+<tr valign="top"><td><code>state</code></td>
+<td>
+The state, defined in the same way as the input argument <code>state</code> 
+since the output <code>state</code> of one call is
+the input <code>state</code> of the next call.</td></tr>
+<tr valign="top"><td><code>maxReached</code></td>
+<td>
+This is <code>TRUE</code> if the maximum number of parameter has been reached.</td></tr>
+<tr valign="top"><td><code>lastCompleted</code></td>
+<td>
+When all of the models with  <i>j</i> K parameters have 
+been specified, <code>lastCompleted</code> equals <i>j</i>.  
+This is useful in <code>ems</code> when <code>smart = TRUE</code> as it defines how far into the 
+model space the fitting process has gone so far in terms of numbers of model parameters. </td></tr>
+</table>
+
+<h3>Note</h3>
+
+<p>
+This work was supported by the National Cancer Institute (K25CA104791).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>
+Tom Radivoyevitch (txr24@case.edu)
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Radivoyevitch, T. (2008) Equilibrium model selection: dTTP 
+induced R1 dimerization. <EM>BMC Systems Biology</EM> <B>2</B>, 15.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="mkGrids.html">mkGrids</a></code>, <code><a href="ccems-package.html">ccems</a></code>, <code><a onclick="findlink('utils', 'combn.html')" style="text-decoration: underline; color: blue; cursor: hand">combn</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(ccems)
+topology &lt;- list(  
+        heads=c("R1t0","R2t0"),  
+        sites=list(       
+                s=list(                     # s-site    thread #
+                        m=c("R1t1"),        # monomer      1
+                        d=c("R2t1","R2t2")  # dimer        2
+                )
+        )
+) 
+g &lt;- mkg(topology) 
+mkSpurs(g,p=0.95,doTights=TRUE)
+</pre>
+
+<script Language="JScript">
+function findlink(pkg, fn) {
+var Y, link;
+Y = location.href.lastIndexOf("\\") + 1;
+link = location.href.substring(0, Y);
+link = link + "../../" + pkg + "/chtml/" + pkg + ".chm::/" + fn;
+location.href = link;
+}
+</script>
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.03 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

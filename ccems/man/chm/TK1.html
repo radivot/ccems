@@ -1,0 +1,175 @@
+<html><head><title>Thymidine Kinase 1 Data</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>TK1(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   TK1">
+<param name="keyword" value=" Thymidine Kinase 1 Data">
+</object>
+
+
+<h2>Thymidine Kinase 1 Data</h2>
+
+
+<h3>Description</h3>
+
+<p>
+Human thymidine kinase 1 (i.e. cytosolic) data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>data(TK1)</pre>
+
+
+<h3>Format</h3>
+
+<p>
+A data frame with the following columns.
+<dl>
+<dt><code>E</code></dt><dd>The total concentration of TK1 enzyme. </dd>
+<dt><code>S</code></dt><dd>The total concentration of dT (the nucleoside substrate).</dd>
+<dt><code>X</code></dt><dd>The total concentration of ATP.</dd>
+<dt><code>v</code></dt><dd>The velocity of the kinase reaction.</dd>
+<dt><code>fg</code></dt><dd>The figure number in the original paper.</dd>
+<dt><code>year</code></dt><dd>The year of the original paper.</dd>
+<dt><code>jrnl</code></dt><dd>The journal of the data source: 
+<code>PEP</code> is Protein Expression and Purification, 
+<code>EJB</code> is  European Journal of Biochemistry, 
+<code>BBRC</code> is Biochem Biophys Res Commun, 
+<code>JBC</code> is Journal of Biological Chemistry.
+</dd>
+<dt><code>vol</code></dt><dd>The volume number of the article.</dd>
+<dt><code>page</code></dt><dd>The page number of the article.</dd>
+<dt><code>frstAut</code></dt><dd>The first author of the article. This is a factor.  </dd>
+<dt><code>index</code></dt><dd>The articles indexed as 1 through 5.  </dd>
+<dt><code>k</code></dt><dd>The measured/average activity in 1/sec per enzyme molecule present.  </dd>
+</dl>
+
+<h3>Details</h3>
+
+<p>
+All concentrations are in micromolar.
+</p>
+
+
+<h3>Source</h3>
+
+<p>
+The figure number, year, first author, journal, volume and page number are all included in the dataframe.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+
+## Note that two windows devices will end up exactly on top of each other. 
+## Please move device 3 below device 2 to compare their residual plots. 
+library(ccems)
+## Warning: the next line clears all existing figures!!
+if (!is.null(dev.list())) for (i in 2:max(dev.list())) dev.off(i);
+for (j in 1:2) {
+  if (.Platform$OS.type=="windows") 
+    windows(width = 10, height = 4,restoreConsole = TRUE,
+    ypos=ifelse(j==2,-50,0)) else X11(width=10,height=4)
+  par(mfcol=c(2,5),mar=c(4,4,2,1)+.1)
+  for (i in 1:5) {
+    d=subset(TK1,index==i,select=c(E,S,k,frstAut,year))
+    if (j==1) 
+      hillda&lt;-nls(k~kmax*(S/S50)^h/(1+(S/S50)^h),d,start=list(kmax=5,S50=1,h=1))
+    if (j==2) 
+      hillda&lt;-nls(k~kmax*(S/S50)^h/(1+(S/S50)^h),d,
+                  start=list(kmax=5,S50=1,h=1),weights=1/k^2)
+    print(hillda)
+    plot(d$S,d$k,xlab="Total [dT]",log="xy", ylab="k (1/sec)", 
+        main=paste(d[1,"frstAut"],d[1,"year"]))
+    mtext(paste("N =",length(d$k)),line=-3,side=1,font=1,cex=0.7)
+    mtext(paste("Hill Coeff = ",format(hillda$m$getPars()["h"],digits=3),sep="")
+           ,line=-2,side=1,font=1,cex=0.7)
+    ## Note that the specific activity is ~16 fold higher in non-Birringer data
+    lgx=log(d$S)
+    upr=range(lgx)[2]
+    lwr=range(lgx)[1]
+    del=(upr-lwr)/50
+    fineX=exp(seq(lwr,upr,by=del))
+    lines(fineX,predict(hillda,list(S=fineX)),col="black",lwd=1)
+    plot(hillda$m$fitted(),hillda$m$resid(),xlab="Fitted Value",
+        ylab="Residual",mar=c(2,2,0,1)+.1)
+    ## Note that variance increases with the mean in non-Birringer data
+    ## and that the 2000 and 1993 Hill fits are poor at low k (and [S])
+  }
+}
+
+## Not run: 
+if (.Platform$OS.type=="windows")  # now create a window for ccems fits 
+ windows(width = 10, height = 4,restoreConsole = TRUE, ypos=50) else 
+         X11(width=10,height=4)
+library(ccems)
+topology &lt;- list(  
+    heads=c("E1S0"), # E1S0 = substrate free E
+    sites=list(                    
+        c=list(    # c for catalytic site  
+            t=c("E1S1","E1S2","E1S3","E1S4")   
+        ) # t for tetramer 
+    )
+)   # in transform below, TK1 is 25kDa =&gt; 25mg/umole
+g &lt;-mkg(topology, activity=TRUE,TCC=FALSE)
+
+getKk &lt;- function(x) {t(x$report[c(paste("E1S",0:3,"_S",sep=""),
+                       paste("kE1S",1:4,sep="")),"final",drop=FALSE])}
+getAIC &lt;- function(x) { x$report["AIC","final"]}
+getSSE &lt;- function(x) { x$report["SSE","final"]}
+outs=list(NULL)
+par(mfcol=c(2,5),mar=c(4,4,2,1)+.1)
+for (i in 1:5) {
+d=subset(TK1,index==i,select=c(E,S,k,frstAut,year))
+plot(d$S,d$k,xlab="Total [dT]",log="xy", ylab="k (1/sec)", 
+         main=paste(d[1,"frstAut"],d[1,"year"]))
+names(d)[1:2]= c("ET","ST")
+tops=ems(d,g,maxTotalPs=3,doSpurs=FALSE)# takes ~15 sec for each dataset
+lgx=log(d$ST)
+upr=range(lgx)[2]
+lwr=range(lgx)[1]
+del=(upr-lwr)/50
+fineX=exp(seq(lwr,upr,by=del))
+predict &lt;- data.frame(ET = rep(d$ET[1],length(fineX)), ST = fineX)
+df &lt;- simulateData(tops[[1]],predict=predict,typeYP="k")$predict  
+lines(df$ST,df$EY) 
+Kk=lapply(tops,getKk)
+nms=names(Kk)
+rowList=data.frame(NULL)
+for (j in nms) {
+    rowList=rbind(rowList,Kk[[j]])
+  }
+rownames(rowList)&lt;-nms
+aic=sapply(tops,getAIC)
+sse=sapply(tops,getSSE)
+eDelAIC=exp(-(aic-min(aic)))
+wgts=eDelAIC/sum(eDelAIC)
+print(sum(wgts))
+df=data.frame(aic,sse,wgts,rowList)
+M=as.matrix(rowList)
+ma=exp(wgts%*%log(M)) # average in space of gibbs free energy changes
+dataID=paste(d[1,"frstAut"],d[1,"year"],sep="")
+outs[[dataID]]$df=df
+outs[[dataID]]$ma=ma
+plot(tops[[1]]$d$EY,tops[[1]]$res,xlab="Fitted Value",
+               ylab="Residual",main=tops[[1]]$mid)
+## Note that the 2000 and 1993 fits are now improved 
+}
+outs=outs[-1] # remove leading NULL
+print(outs)   # compare model averages across datasets
+par(mfrow=c(1,1))
+## End(Not run)  
+
+</pre>
+
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.03 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

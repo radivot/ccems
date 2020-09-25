@@ -1,0 +1,175 @@
+<html><head><title>Simulate Data</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>simulateData(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   simulateData">
+<param name="keyword" value=" Simulate Data">
+</object>
+
+
+<h2>Simulate Data</h2>
+
+
+<h3>Description</h3>
+
+<p>
+This function generates expected values of responses at the total concentrations 
+of the dataframe <code>g$d</code>  
+or at points specified in <code>predict</code> if <code>predict</code> is not <code>NULL</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre> simulateData(g, init = FALSE, predict = NULL, typeYP = NULL) </pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>g</code></td>
+<td>
+A specific model/hypothesis created by <code>mkModel</code>. </td></tr>
+<tr valign="top"><td><code>init</code></td>
+<td>
+This is <code>TRUE</code> only in first calls to this function by the parameter estimate optimization algorithm. 
+When <code>TRUE</code> the initial AIC value is set. </td></tr>
+<tr valign="top"><td><code>predict</code></td>
+<td>
+A dataframe of total concentrations of the reactants 
+at which response predictions are desired.  </td></tr>
+<tr valign="top"><td><code>typeYP</code></td>
+<td>
+The type of output data desired for the predictions. 
+Options are "m" and "v" for average mass and reaction velocity, respectively.
+The option "P" (proportions) for mass distribution data is still in development.   </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+This function is the workhorse core of the nonlinear least squares 
+algorithm, so its speed is 
+critical which is why it uses compiled C code when <code>g$TCC = TRUE</code>. 
+In addition to model fitting, this function can also be used to predict 
+system response surfaces over grids of
+physiologically relevant total concentrations of the reactants. 
+It is assumed that the model used to formulate predictions is based on data, and that
+the output type of the predictions is the same as the output type used to build the model.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+The input model object augmented to include the following fields if <code>predict</code> is <code>NULL</code>.
+</p>
+<table summary="R argblock">
+<tr valign="top"><td><code>echk</code></td>
+<td>
+A matrix that checks the TCC solver and <code>g$fback</code>. Matrix column names 
+that end in Q should match their sans-Q counterparts. </td></tr>
+<tr valign="top"><td><code>eSS</code></td>
+<td>
+The expected steady state concentrations of species (complexes and free reactants). 
+For each row of the data dataframe there is a row in this
+matrix. Its contents are the TCC solver solution (free reactant 
+expected concentrations) and the result of applying 
+<code>g$fback</code> to them to create expected complex concentrations.  </td></tr>
+<tr valign="top"><td><code>res</code></td>
+<td>
+The residuals of the fit.</td></tr>
+<tr valign="top"><td><code>nData</code></td>
+<td>
+The number of data points (i.e. rows) in the data dataframe <code>g$d</code>.</td></tr>
+<tr valign="top"><td><code>SSE</code></td>
+<td>
+The initial and final sum of squared errors (i.e. residual sum of squares).</td></tr>
+<tr valign="top"><td><code>AIC</code></td>
+<td>
+The initial and final Akaike Information Criterion values, corrected for small samples. S
+ince nonlinear least squares is used  
+<code>AIC = N*log(SSE/N)+2*P + 2*P*(P+1)/(N-P-1) + N*log(2*pi) + N </code> where 
+<code>N = nData</code> and <code>P</code> is the 
+number of estimated parameters (including the variance).</td></tr>
+<tr valign="top"><td><code>predict</code></td>
+<td>
+The input argument <code>predict</code> with an additional 
+expected system response column named "EY".</td></tr>
+</table>
+
+<h3>Note</h3>
+
+<p>
+The function <code>fitModel</code> augments the input model object by the same six fields above because 
+it calls this function iteratively. 
+</p>
+<p>
+Measurements are often made at total concentrations that are substantially 
+higher than physiological values due to 
+signal-to-noise limitations. Thus, predictions in physiologically relevant 
+(and thus important) regions tend to be weak. 
+</p>
+<p>
+This work was supported by the National Cancer Institute (K25CA104791).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>
+Tom Radivoyevitch (txr24@case.edu)
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Radivoyevitch, T. (2008) Equilibrium model selection: dTTP induced R1 dimerization. 
+<EM>BMC Systems Biology</EM> <B>2</B>, 15.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+The experimental design example <code>expDesign</code> in the <code>docs</code> directory.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(ccems)
+topology &lt;- list(  
+        heads=c("R1t0","R2t0"),  
+        sites=list(       
+                s=list(                     # s-site    thread #
+                        m=c("R1t1"),        # monomer      1
+                        d=c("R2t1","R2t2")  # dimer        2
+                )
+        )
+) 
+g &lt;- mkg(topology,TCC=TRUE) 
+d=subset(RNR,(year==2001)&amp;(fg==1)&amp;(t&gt;0)&amp;(G==0),select=c(R,t,m,year))
+names(d)[1:2] &lt;-c("RT","tT") 
+mdl=mkModel(g,"IIIJ",d,Kjparams=c(R2t0=Inf, R1t1=Inf,R2t1=Inf, R2t2=1),
+                     pparams=c(p=1))
+fmdl &lt;- fitModel(mdl)
+pt=c(.1,1:20)
+predict &lt;- data.frame(RT = rep(7.6,length(pt)), tT = pt)
+df &lt;- simulateData(fmdl,predict=predict,typeYP="m")$predict  
+plot(d$tT,d$m,type="p",  xlab="[dTTP] (uM)", ylab="Weight averaged R1 mass", 
+     main="Scott et al. Biochemistry, 2001, Fig. 1 (DLS data)")
+lines(df$tT,df$EY) 
+
+</pre>
+
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.03 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

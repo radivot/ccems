@@ -1,0 +1,83 @@
+<html><head><title>Make Equality Constraints Lists</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>mkEq(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   mkEq">
+<param name="keyword" value=" Make Equality Constraints Lists">
+</object>
+
+
+<h2>Make Equality Constraints Lists</h2>
+
+
+<h3>Description</h3>
+
+<p>
+This function converts a dataframe/chunk of models with either k or K equalities
+into a list structure that maps the trackers onto the independent parameter estimate.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre> mkEq(g,chunk,activity=FALSE) </pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>g</code></td>
+<td>
+The output of <code>mkg</code>. </td></tr>
+<tr valign="top"><td><code>chunk</code></td>
+<td>
+The <code>chunk</code> component of the output of <code>mkGrids</code> and <code>mkSpurs</code>.  </td></tr>
+<tr valign="top"><td><code>activity</code></td>
+<td>
+This is <code>TRUE</code> if the desired output is <code>keq</code> and <code>FALSE</code> if it is <code>Keq</code>.   </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+This function is already called internally by <code>mkGrids</code> and <code>mkSpurs</code>. 
+Thus, the user should not need to call it. Note that the input <code>activity</code> can be false
+even if the dataset is activity data (i.e. <code>activity</code> in <code>g</code> is <code>TRUE</code>) since 
+even then this function may be called to create K equalities rather than k equalities.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+Lists of either k or K equality constraints</p>
+
+<h3>Author(s)</h3>
+
+<p>
+Tom Radivoyevitch (txr24@case.edu)
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Radivoyevitch, T. (2008) Equilibrium model 
+selection: dTTP induced R1 dimerization. <EM>BMC Systems Biology</EM> <B>2</B>, 15.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="mkGrids.html">mkGrids</a></code>, <code><a href="mkSpurs.html">mkSpurs</a></code>
+</p>
+
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.01 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

@@ -1,0 +1,235 @@
+<html><head><title>Equilibrium Model Selection</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>ems(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   ems">
+<param name="keyword" value=" Equilibrium Model Selection">
+</object>
+
+
+<h2>Equilibrium Model Selection</h2>
+
+
+<h3>Description</h3>
+
+<p>
+This is the main automation function of this package. It generates a space of  
+combinatorially complex equilibrium models and fits them to data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>ems(d, g, cpusPerHost=c("localhost" = 1), ptype="",
+          spurChunkSize=1000, nSpurChunks=1,
+          maxTotalPs=5,minTotalPs=NULL,extend2maxP=TRUE, 
+          smart=FALSE,doTights=FALSE,doGrids=TRUE,
+          doSpurs=TRUE,topN=10,showConstr=FALSE,
+          atLeastOne=TRUE,atLeastOneOfEach=FALSE,
+          KIC=1,kIC=1,fullGrid=FALSE,
+        transform=c("boxCox","relResid","none","sqrt","log"),lam=0.5,
+        m1=-90,p=-1,forceM1=FALSE,forceP=FALSE)</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>d</code></td>
+<td>
+The data as a dataframe.</td></tr>
+<tr valign="top"><td><code>g</code></td>
+<td>
+The list output of <code>mkg</code>. </td></tr>
+<tr valign="top"><td><code>cpusPerHost</code></td>
+<td>
+This is an integer vector where names are host names and values are their cpu numbers. </td></tr>
+<tr valign="top"><td><code>ptype</code></td>
+<td>
+Parallelization type: <code>""</code> for single cpus; <code>"SOCK"</code> and  <code>"NWS"</code> (networkspaces) 
+for <code>snow</code> options.   
+<br>
+</td></tr>
+<tr valign="top"><td><code>spurChunkSize</code></td>
+<td>
+The <code>batchSize</code> of spur model chunks, see <code><a href="mkSpurs.html">mkSpurs</a></code></td></tr>
+<tr valign="top"><td><code>nSpurChunks</code></td>
+<td>
+The number of spur model chunks requested 
+(this may increase internally if <code>extend2maxP</code> = <code>TRUE</code> or <code>smart=TRUE</code>).</td></tr>
+<tr valign="top"><td><code>maxTotalPs</code></td>
+<td>
+The maximum number of parameters of models that will 
+be fitted (internally, larger models may be generated but not fitted).</td></tr>
+<tr valign="top"><td><code>minTotalPs</code></td>
+<td>
+The minimum number of parameters of models in the model space.
+If <code>NULL</code> no minimum is imposed. </td></tr>
+<tr valign="top"><td><code>extend2maxP</code></td>
+<td>
+This logical is <code>TRUE</code> if <code>nSpurChunks</code> should be extended 
+(if needed) to reach <code>maxTotalPs</code>. </td></tr>
+<tr valign="top"><td><code>smart</code></td>
+<td>
+Set to <code>TRUE</code> to stop when models with <code>lastCompleted</code> parameters (see <code><a href="mkSpurs.html">mkSpurs</a></code>) 
+have an AIC that is bigger than that of the <code>lastCompleted-1</code> parameter models. </td></tr>
+<tr valign="top"><td><code>doTights</code></td>
+<td>
+Set  to <code>TRUE</code> if spur models with infinitely tight binding single edges (with K=0) are wanted in the model space.</td></tr>
+<tr valign="top"><td><code>doGrids</code></td>
+<td>
+Leave <code>TRUE</code> (the default) if grid models are wanted, set to <code>FALSE</code> if not (e.g. if only spur models are wanted). </td></tr>
+<tr valign="top"><td><code>doSpurs</code></td>
+<td>
+Leave <code>TRUE</code> if the spur model space is wanted, set to <code>FALSE</code> if not (e.g. if only grid models are wanted). </td></tr>
+<tr valign="top"><td><code>topN</code></td>
+<td>
+The number of best models of the current batch of models that will be carried 
+over to compete with the next batch; such carryovers 
+are needed to allow fits of model spaces that are too large to reside in memory at one time. 
+This number  is also the number of best models
+summarized in html in the <code>results</code> folder after fitting each batch.</td></tr>
+<tr valign="top"><td><code>showConstr</code></td>
+<td>
+Set to <code>TRUE</code> if constrained (fixed and tracking) parameters are to be included in the html report in <code>results</code>.</td></tr>
+<tr valign="top"><td><code>atLeastOne</code></td>
+<td>
+Leave <code>TRUE</code> if only models with at least one complex of maximal size are to be considered. Set <code>FALSE</code> if there is no
+prior knowledge supportive of the assertion that the largest oligomer must be in the model.</td></tr>
+<tr valign="top"><td><code>atLeastOneOfEach</code></td>
+<td>
+Set <code>TRUE</code> if only models with at least one complex 
+of each oligomer size are to be considered. This is useful when the data are multivariate
+proportions (i.e. mass distribution data) and each j-mer is clearly present. </td></tr>
+<tr valign="top"><td><code>KIC</code></td>
+<td>
+The initial condition of all K parameters optimized. The default is <code>KIC=1</code> (in uM). </td></tr>
+<tr valign="top"><td><code>kIC</code></td>
+<td>
+The initial condition of all k parameters optimized. The default is <code>kIC=1</code> (in 1/seconds per occupied active site). </td></tr>
+<tr valign="top"><td><code>fullGrid</code></td>
+<td>
+Set <code>TRUE</code> if a full binary K model is wanted, else grids that are 
+equivalent to spurs are eliminated from the model space. </td></tr>
+<tr valign="top"><td><code>transform</code></td>
+<td>
+If not <code>"none"</code> data and model are transformed before forming residuals. 
+This is used to stabilize enzyme activity variances. Other options are <code>"boxCox"</code> for Box-Cox
+transformations, in which case <code>lam</code> below is used as lambda, 
+<code>"relResid"</code> to divide the residuals by the data, 
+and square root and natural log transformations using <code>"sqrt"</code> and <code>"log"</code>, respectively.</td></tr>
+<tr valign="top"><td><code>lam</code></td>
+<td>
+The lambda parameter of the Box-Cox transformation, if used. </td></tr>
+<tr valign="top"><td><code>m1</code></td>
+<td>
+The hub protein's monomer mass in kDa. 
+The default is 90 for the big (R1) subunit of ribonucleotide reductase (RNR).
+This only matters if the data is mass data. Negative numbers imply fixed values and
+positive numbers imply starting values to be fitted to the data.</td></tr>
+<tr valign="top"><td><code>p</code></td>
+<td>
+Probability that hub can oligomerize, i.e. is not damaged. 
+Set to a positive value if additional rows are to be added to the output dataframe to include models 
+with <code>p</code> freely estimated. Set negative to hold fixed. Value is the initial or fixed value.</td></tr>
+<tr valign="top"><td><code>forceM1</code></td>
+<td>
+Set <code>TRUE</code> to force all models to estimate M1, i.e. to not generate models with M1 fixed. </td></tr>
+<tr valign="top"><td><code>forceP</code></td>
+<td>
+Set <code>TRUE</code> to force all models to estimate p, i.e. to not generate models with fixed p. </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+This is the highest level function in <code>ccems</code>. The other functions serve this function, though they may also be used to fit individual 
+models manually.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+A list of the <code>topN</code> best (lowest AIC) models. This should be assigned to a variable 
+to avoid large screen dumps. 
+An html report, the topN fitted models, and a brief summary of all fitted models, are saved to 
+<code>results</code> and are the main outputs and use of this function.</p>
+
+<h3>Note</h3>
+
+<p>
+Spur and grid graph models have network topologies that either radiate 
+from the hub or can be overlaid on a city block lay out, respectively. 
+Though head node spur graph edges can be superimposed in curtain rods (see <code><a href="ccems-package.html">ccems</a></code>) 
+to give these graphs a grid appearance, curtain rods are really sets 
+of nested arches. Thus curtains could be called spur-grid hybrid K equality graphs or simply hybrids
+(i.e. a term that is more tolerant than grid). Another option is to tolerate spur 
+edges to head nodes in a 
+broadened definition of the term grid. Advantages include an emphasis on parallel edges and thus 
+equality aspects of the graph (compared to the term hybrid), more compactness 
+(compared to the term K equality) and usage inertia. 
+Readers are thus asked to accept this broadened definition 
+of the term grid, i.e. to allow head node spur edges in grid graphs. 
+</p>
+<p>
+This work was supported by the National Cancer Institute (K25CA104791).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>
+Tom Radivoyevitch (txr24@case.edu)
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Radivoyevitch, T. (2009) Automated model generation and analysis methods 
+for combinatorially complex biochemical equilibriums. (In preparation)
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="ccems-package.html">ccems</a></code>, <code><a href="mkg.html">mkg</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(ccems)
+topology &lt;- list(  
+        heads=c("R1t0","R2t0"),  
+        sites=list(       
+                s=list(                     # s-site    thread #
+                        m=c("R1t1"),        # monomer      1
+                        d=c("R2t1","R2t2")  # dimer        2
+                )
+        )
+) 
+g &lt;- mkg(topology) 
+data(RNR)
+d1 &lt;- subset(RNR,(year==2001)&amp;(fg==1)&amp;(G==0)&amp;(t&gt;0),select=c(R,t,m,year))
+d2 &lt;- subset(RNR,year==2006,select=c(R,t,m,year)) 
+dd &lt;- rbind(d1,d2)
+names(dd)[1:2] &lt;- c("RT","tT")
+rownames(dd) &lt;- 1:dim(dd)[1] # lose big number row names of parent dataframe
+# the call above ends sooner if maxTotalPs is reached
+## Not run: 
+ 
+top &lt;- ems(dd,g,maxTotalPs=1)  # this takes roughly one minute 
+## End(Not run)
+</pre>
+
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.03 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

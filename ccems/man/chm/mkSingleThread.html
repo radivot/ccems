@@ -1,0 +1,69 @@
+<html><head><title>Make Equality Constraints Lists</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>mkSingleThread(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   mkSingleThread">
+<param name="keyword" value=" Make Equality Constraints Lists">
+</object>
+
+
+<h2>Make Equality Constraints Lists</h2>
+
+
+<h3>Description</h3>
+
+<p>
+This function creates k or K equality matrices for single threads.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre> mkSingleThread(nNodes,g) </pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>nNodes</code></td>
+<td>
+The number of nodes in the thread.  </td></tr>
+<tr valign="top"><td><code>g</code></td>
+<td>
+The output of <code>mkg</code>. This is used only to grab the <code>mylets</code> field. </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+This function is called internally by <code>mkGrids</code> and <code>mkSpurs</code>. 
+Thus, the user should not need to call it.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+Matrix of characters of contiguous blocks of K or k equality constraints within a thread.</p>
+
+<h3>Author(s)</h3>
+
+<p>
+Tom Radivoyevitch (txr24@case.edu)
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="mkGrids.html">mkGrids</a></code>, <code><a href="mkSpurs.html">mkSpurs</a></code>
+</p>
+
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.01 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

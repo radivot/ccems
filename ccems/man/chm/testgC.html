@@ -1,0 +1,98 @@
+<html><head><title>Test g Object TCC C Compilation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>testgC(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   testgC">
+<param name="keyword" value=" Test g Object TCC C Compilation">
+</object>
+
+
+<h2>Test g Object TCC C Compilation</h2>
+
+
+<h3>Description</h3>
+
+<p>
+This function runs <code>lsoda</code> using the compiled C code of 
+the total concentration constraint (TCC) 
+system equations that should have been created by <code>mkg</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre> testgC(g) </pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>g</code></td>
+<td>
+The output of <code>mkg</code>. Since <code>mkg</code> already calls this function, it has no independent use. </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+Components of <code>g</code> used by this function are:  
+<code>g$parmsTCC</code> which includes the total concentrations, the fraction of active protein p, and the spur graph complete dissociation
+constant parameter values Kj; and the <code>lsoda</code> ODE integration
+tolerance parameters <code>g$rtol</code> and <code>g$atol</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+No value returned. Ten time points are printed to the screen. 
+The free concentrations should show signs of convergence toward a steady state.</p>
+
+<h3>Author(s)</h3>
+
+<p>
+Tom Radivoyevitch
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a onclick="findlink('odesolve', 'lsoda.html')" style="text-decoration: underline; color: blue; cursor: hand">lsoda</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(ccems)
+topology &lt;- list(  
+        heads=c("R1t0","R2t0"),  
+        sites=list(       
+                s=list(                     # s-site    thread #
+                        m=c("R1t1"),        # monomer      1
+                        d=c("R2t1","R2t2")  # dimer        2
+                )
+        )
+) 
+g=mkg(topology,TCC=TRUE) 
+testgC(g) # this checks the compiled code again (it was already called in mkg) 
+</pre>
+
+<script Language="JScript">
+function findlink(pkg, fn) {
+var Y, link;
+Y = location.href.lastIndexOf("\\") + 1;
+link = location.href.substring(0, Y);
+link = link + "../../" + pkg + "/chtml/" + pkg + ".chm::/" + fn;
+location.href = link;
+}
+</script>
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.01 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

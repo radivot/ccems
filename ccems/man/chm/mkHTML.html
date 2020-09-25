@@ -1,0 +1,78 @@
+<html><head><title>Make HTML File</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>mkHTML(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   mkHTML">
+<param name="keyword" value=" Make HTML File">
+</object>
+
+
+<h2>Make HTML File</h2>
+
+
+<h3>Description</h3>
+
+<p>
+Writes the best models to an html summary file in the <code>results</code> directory.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre> mkHTML(smodels,showConstr=FALSE) </pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>smodels</code></td>
+<td>
+A list of fitted model objects, preferably already sorted by best AIC.  </td></tr>
+<tr valign="top"><td><code>showConstr</code></td>
+<td>
+This is <code>TRUE</code> if constrained (fixed or tracking) parameters are to be included 
+in the html output file. This is used for error checking.   </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+This function is already called internally by <code>ems</code> after each chunk of models 
+is fitted. Thus, the user should not need to call it.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+No value. The output is an html file in the <code>results</code> directory.</p>
+
+<h3>Author(s)</h3>
+
+<p>
+Tom Radivoyevitch (txr24@case.edu)
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Radivoyevitch, T. (2008) Equilibrium model 
+selection: dTTP induced R1 dimerization. <EM>BMC Systems Biology</EM> <B>2</B>, 15.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="mkModel.html">mkModel</a></code>, <code><a href="ems.html">ems</a></code>
+</p>
+
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.01 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

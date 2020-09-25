@@ -1,0 +1,166 @@
+<html><head><title>Fit Model</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>fitModel(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   fitModel">
+<param name="keyword" value=" Fit Model">
+</object>
+
+
+<h2>Fit Model</h2>
+
+
+<h3>Description</h3>
+
+<p>
+This function fits a model/hypothesis created by <code>mkModel</code>. 
+It is typically passed to <code>lapply</code> or <code>clusterApplyLB</code> to 
+fit a list of model objects, typically within <code>ems</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre> fitModel(model) </pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>model</code></td>
+<td>
+The output list of <code>mkModel</code>. </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+The main output of this function is the <code>report</code> component of its value (see below) which is also echoed to the screen during 
+computations.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+The input argument <code>model</code> extended to include the following fields:  
+</p>
+<table summary="R argblock">
+<tr valign="top"><td><code>echk</code></td>
+<td>
+A matrix that checks the TCC solver and <code>model$fback</code>. Matrix column names that end in Q should match their sans-Q counterparts. </td></tr>
+<tr valign="top"><td><code>eSS</code></td>
+<td>
+The expected steady state concentrations of complexes and free reactants. 
+For each row of the data dataframe there is a row in this
+matrix. Its contents are the TCC solver's expected free reactant concentrations 
+and the result of applying 
+<code>model$fback</code> to them to create expected complex concentrations.  </td></tr>
+<tr valign="top"><td><code>res</code></td>
+<td>
+The residuals of the fit.</td></tr>
+<tr valign="top"><td><code>nData</code></td>
+<td>
+The number of data points/rows in the data dataframe <code>model$d</code>.</td></tr>
+<tr valign="top"><td><code>SSE</code></td>
+<td>
+The initial and final sum of squared errors (i.e. residual sum of squares).</td></tr>
+<tr valign="top"><td><code>AIC</code></td>
+<td>
+The initial and final Akaike Information Criterion values, corrected for small samples. Since nonlinear least squares is used  
+<code>AIC = N*log(SSE/N)+2*P + 2*P*(P+1)/(N-P-1) + N*log(2*pi) + N </code> where <code>N = nData</code> and <code>P</code> is the 
+number of estimated parameters (including the variance).</td></tr>
+<tr valign="top"><td><code>nOptParams</code></td>
+<td>
+The number of optimized parameters, i.e. the length of the parameter vector sent to <code>optim</code>. </td></tr>
+<tr valign="top"><td><code>hess</code></td>
+<td>
+This is <code>TRUE</code> if the determinant of the Hessian of the log-likelihood evaluated at the optimum is greater than zero, 
+i.e. if the hessian can be inverted to create a parameter estimate covariance matrix.  </td></tr>
+<tr valign="top"><td><code>CI</code></td>
+<td>
+Confidence intervals. Unlike those in <code>model$report</code> these are numeric rather than strings and these are 
+not expressed as concentrations raised to integer powers (in cases of complete dissociation constants).</td></tr>
+<tr valign="top"><td><code>cpu</code></td>
+<td>
+The amount of computing time (in minutes) taken to fit the model. </td></tr>
+<tr valign="top"><td><code>report</code></td>
+<td>
+An extension of <code>model$params</code> to include parameter point estimates and 
+confidence intervals (see <code>CI</code> above). The <code>final</code>
+column holds numerics and the <code>pointEstimate</code> column holds strings of the 
+same numbers expressed as powers in cases 
+of complete dissociation constants.</td></tr>
+</table>
+
+<h3>Note</h3>
+
+<p>
+This work was supported by the National Cancer Institute (K25CA104791).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>
+Tom Radivoyevitch (txr24@case.edu)
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Radivoyevitch, T. (2008) Equilibrium model selection: dTTP induced R1 
+dimerization. <EM>BMC Systems Biology</EM> <B>2</B>, 15.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="mkModel.html">mkModel</a></code>,<code><a href="ems.html">ems</a></code>,<code><a href="ccems-package.html">ccems</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(ccems)
+topology &lt;- list(  
+        heads=c("R1t0","R2t0"),  
+        sites=list(       
+                s=list(                     # s-site    thread #
+                        m=c("R1t1"),        # monomer      1
+                        d=c("R2t1","R2t2")  # dimer        2
+                )
+        )
+) 
+g &lt;- mkg(topology,TCC=TRUE) 
+data(RNR)
+d1 &lt;- subset(RNR,(year==2001)&amp;(fg==1)&amp;(G==0)&amp;(t&gt;0),select=c(R,t,m,year))
+d2 &lt;- subset(RNR,year==2006,select=c(R,t,m,year)) 
+dRt &lt;- rbind(d1,d2)
+names(dRt)[1:2] &lt;- paste(strsplit(g$id,split="")[[1]],"T",sep="")#e.g. to form "RT"
+rownames(dRt) &lt;- 1:dim(dRt)[1] # lose big number row names of parent dataframe
+
+## Not run: 
+models &lt;- list(
+       mkModel(g,"IIJJ",dRt,Kjparams=c(R2t0=Inf, R1t1=Inf,R2t1=1,   R2t2=1)), 
+       mkModel(g,"IIIJ",dRt,Kjparams=c(R2t0=Inf, R1t1=Inf,R2t1=Inf, R2t2=1))
+       )
+# the next line fits the list of two models above in series on a single processor 
+fmodels &lt;- lapply(models,fitModel) 
+## End(Not run)
+# Note that fitModel always delivers a summary of the fit to the screen as a byproduct. 
+# The output of the call is assigned to avoid scrolling up through the returned large 
+# fitted list of models in order to find this summary. 
+</pre>
+
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.01 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

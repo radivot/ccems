@@ -1,0 +1,104 @@
+<html><head><title>Ribonucleotide Reductase Data</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>RNR(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   RNR">
+<param name="keyword" value=" Ribonucleotide Reductase Data">
+</object>
+
+
+<h2>Ribonucleotide Reductase Data</h2>
+
+
+<h3>Description</h3>
+
+<p>
+This is a compilation of ribonucleotide reductase (RNR) literature data into one data frame.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>data(RNR)</pre>
+
+
+<h3>Format</h3>
+
+<p>
+A data frame with 546 observations on the following 23 variables.
+<dl>
+<dt><code>R</code></dt><dd>The total concentration of R1 (big R for the big subunit of RNR).</dd>
+<dt><code>r</code></dt><dd>The total concentration of R2 dimer (small r for the small subunit of RNR).</dd>
+<dt><code>U</code></dt><dd>The total concentration of UDP.</dd>
+<dt><code>C</code></dt><dd>The total concentration of CDP.</dd>
+<dt><code>G</code></dt><dd>The total concentration of GDP.</dd>
+<dt><code>A</code></dt><dd>The total concentration of ADP.</dd>
+<dt><code>t</code></dt><dd>The total concentration of dTTP.</dd>
+<dt><code>tf</code></dt><dd>The concentration of free dTTP.</dd>
+<dt><code>g</code></dt><dd>The total concentration of dGTP.</dd>
+<dt><code>gf</code></dt><dd>The concentration of free dGTP.</dd>
+<dt><code>a</code></dt><dd>The total concentration of dATP.</dd>
+<dt><code>af</code></dt><dd>The concentration of free dATP.</dd>
+<dt><code>X</code></dt><dd>The total concentration of ATP.</dd>
+<dt><code>Mg</code></dt><dd>The total concentration of magnesium.</dd>
+<dt><code>v</code></dt><dd>The velocity of the reduction reaction in 1/seconds; v in Scott et al should be multiplied by .00151 to create these units, 
+save figure 7 (GDP reduction) which is in percentages of the maximum velocity.</dd>
+<dt><code>m</code></dt><dd>The weight averaged average mass.</dd>
+<dt><code>n</code></dt><dd>The number of ligands bound. Exception is Ingemarson et al. 1996 where it is a possibly negative BIAcore experiment parameter.</dd>
+<dt><code>fg</code></dt><dd>The figure number in the original paper.</dd>
+<dt><code>year</code></dt><dd>The year of the original paper.</dd>
+<dt><code>jrnl</code></dt><dd>The journal of the data source: <code>Bioc</code> is Biochemistry, <code>JBC</code> is Journal of Biological Chemistry.</dd>
+<dt><code>vol</code></dt><dd>The volume number of the article.</dd>
+<dt><code>page</code></dt><dd>The page number of the article.</dd>
+<dt><code>frstAut</code></dt><dd>The first author of the article. This is a 
+factor with levels <code>IngemarsonR</code>, <code>KashlanOB</code>, <code>Rofougaran</code>, <code>sanath</code>, and <code>ScottCP</code>.</dd>
+<dt><code>organism</code></dt><dd>An element of <code>c("human","mouse","yeast","ecoli")</code>. 
+This dataset is predominantly mouse RNR data. </dd>
+</dl>
+
+<h3>Details</h3>
+
+<p>
+All concentrations are in micromolar. 
+To some extent, capital letters are used for ribonucleotides and small letters for deoxyribonucleotides. Free concentrations, where given,
+were model dependent and were thus converted back to total concentrations, i.e. to make them model independent. 
+Values of zero that lead a sequence of measurements of increasing concentrations were set to 1e-2 (essentially zero) to allow [x]&gt;0 subsetting.
+</p>
+
+
+<h3>Source</h3>
+
+<p>
+The figure number, year, first author, journal, volume and page number are all included in the dataframe.  The main reference is
+Kashlan OB, Scott CP, Lear JD, Cooperman BS: A comprehensive model for the allosteric regulation of mammalian ribonucleotide 
+reductase. Functional consequences of ATP- and dATP-induced oligomerization of the large subunit. Biochemistry 2002, 41(2):462-474. 
+The first seven rows, by first author Sanath (Sanath Wijerathna of the Dealwis Lab at CWRU), are unpublished.
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Radivoyevitch, T. (2008) Equilibrium model selection: dTTP induced R1 dimerization. 
+<EM>BMC Systems Biology</EM> <B>2</B>, 15.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(ccems)
+RNR[1:40,]
+d=subset(RNR,(year==2002)&amp;(fg==1)&amp;(X&gt;0),select=c(R,X,m,year))
+plot(d$X,d$m,xlab="Total [ATP]", ylab="Weight averaged R1 mass", 
+     main="Kashlan et al. Biochemistry, 2002, Fig. 1 (DLS data)")
+</pre>
+
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.01 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

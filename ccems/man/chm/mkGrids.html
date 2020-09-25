@@ -1,0 +1,219 @@
+<html><head><title>Make Grid Model Space</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>mkGrids(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   mkGrids">
+<param name="keyword" value=" Make Grid Model Space">
+</object>
+
+
+<h2>Make Grid Model Space</h2>
+
+
+<h3>Description</h3>
+
+<p>
+This function takes <code>g</code> from <code>mkg</code> and maps it into a 
+dataframe of grid model definitions. It also augments and returns the input list <code>g</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre> mkGrids (g,maxTotalPs=NULL,minTotalPs=NULL,contig=TRUE,
+                atLeastOne=TRUE,atLeastOneOfEach=FALSE, 
+                KIC=1,kIC=1,fullGrid=FALSE,
+                m1=-90,p=-1,forceM1=FALSE,forceP=FALSE) </pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>g</code></td>
+<td>
+The output of <code>mkg</code>. </td></tr>
+<tr valign="top"><td><code>maxTotalPs</code></td>
+<td>
+The maximum number of parameters of models in the model space. 
+If <code>NULL</code> all models are found (but see <code>fullGrid</code> below). </td></tr>
+<tr valign="top"><td><code>minTotalPs</code></td>
+<td>
+The minimum number of parameters of models in the model space.
+If <code>NULL</code> no minimum is imposed. </td></tr>
+<tr valign="top"><td><code>contig</code></td>
+<td>
+Set to <code>TRUE</code> to allow Kd equalities of threads only in contiguous runs. Tentatively, 
+this should always be <code>TRUE</code>.</td></tr>
+<tr valign="top"><td><code>atLeastOne</code></td>
+<td>
+Leave <code>TRUE</code> if only models with at least one complex of maximal size are 
+to be considered. Set <code>FALSE</code> if there is no
+prior knowledge supportive of the assertion that the largest oligomer must be in the model.</td></tr>
+<tr valign="top"><td><code>atLeastOneOfEach</code></td>
+<td>
+Set <code>TRUE</code> if only models with at least one complex 
+of each oligomer size are to be considered. This is useful when the data are multivariate
+proportions (i.e. mass distribution data) and each j-mer is clearly present. </td></tr>
+<tr valign="top"><td><code>KIC</code></td>
+<td>
+The initial condition of all K parameters optimized. The default is <code>IC=1</code> (in uM). </td></tr>
+<tr valign="top"><td><code>kIC</code></td>
+<td>
+The initial condition of all k parameters optimized. The default is <code>kIC=1</code> (in 1/seconds per occupied active site). </td></tr>
+<tr valign="top"><td><code>fullGrid</code></td>
+<td>
+Set <code>TRUE</code> if a full binary K model is wanted, else grids that are 
+equivalent to spurs are eliminated from the model space. 
+This is used to obtain grid reparameterizations of full spur models to 
+form model averages across common binary K parameters.  </td></tr>
+<tr valign="top"><td><code>m1</code></td>
+<td>
+The hub protein's monomer mass in kDa. 
+The default is 90 for the big (R1) subunit of ribonucleotide reductase (RNR).
+This only matters if the data is mass data. Negative numbers imply fixed values and
+positive numbers imply starting values to be fitted to the data.</td></tr>
+<tr valign="top"><td><code>p</code></td>
+<td>
+Probability that hub can oligomerize, i.e. is not damaged. 
+Set to a positive value if additional rows are to be added to the output dataframe to include models 
+with <code>p</code> freely estimated. Set negative to hold fixed. Value is the initial or fixed value.</td></tr>
+<tr valign="top"><td><code>forceM1</code></td>
+<td>
+Set <code>TRUE</code> to force all models to estimate M1, i.e. to not generate models with M1 fixed. </td></tr>
+<tr valign="top"><td><code>forceP</code></td>
+<td>
+Set <code>TRUE</code> to force all models to estimate p, i.e. to not generate models with fixed p. </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+In a run of equal threads, the first head node of the run is the leader (optimized parameter) and the remaining nodes in the run are followers 
+(i.e. constrained to track the leader in parameter estimate optimizations); 
+a default in <code>ems</code> is that only leader estimates are reported in html
+in the <code>results</code> subdirectory.
+In contrast to its counterpart <code><a href="mkSpurs.html">mkSpurs</a></code>, a means of traversing
+the grid model space incrementally with increasing numbers of parameters remains to be 
+found and implemented, i.e. 
+<code>mkGrids</code> does not have <code>state</code> inputs and outputs and the whole space is found in one batch.  
+When this drawback 
+limits research due to too much memory usage, 
+attempts will be made to identify an approach that, similar to what has been implemented for 
+<code>mkSpurs</code>, specifies
+chunks of grid models, fits them, and then specifies the next chunk 
+based on knowledge of where the previous chunk stopped. 
+Note that setting 
+<code>maxTotalPs</code> to smaller values will not help this foreseen memory problem 
+as the entire grid model space dataframe is first generated 
+and then, only later, truncated to <code>maxTotalPs</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+A list with components 
+</p>
+<table summary="R argblock">
+<tr valign="top"><td><code>chunk</code></td>
+<td>
+The entire K equality model space requested by the arguments. 
+In this dataframe each row specifies a model. If the <code>activity</code> field of <code>g</code> is <code>TRUE</code> 
+this dataframe includes k columns. The row names encode the equality constraints. 
+Therein . separates K models from k models, I stands for infinity, 
+J stands for freely estimated (in spur components), and other letters are the same when 
+parameters that correspond to their positions equal each other.
+Unmatched other letters are freely estimated and thus just like J's but in
+k and binary K components of the model names. 
+</td></tr>
+<tr valign="top"><td><code>Keqs</code></td>
+<td>
+A list of K equality constraints indexed by 
+model names where each element is a vector of character strings whose names are followers and
+values are leaders. </td></tr>
+<tr valign="top"><td><code>keqs</code></td>
+<td>
+Similar to <code>Keqs</code> but for activity constraints. This is <code>NULL</code> if 
+<code>activity</code> in <code>g</code> is <code>FALSE</code>. </td></tr>
+</table>
+
+<h3>Note</h3>
+
+<p>
+This work was supported by the National Cancer Institute (K25CA104791).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>
+Tom Radivoyevitch (txr24@case.edu)
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Radivoyevitch, T. (2008) Equilibrium model selection: dTTP induced R1 dimerization. 
+<EM>BMC Systems Biology</EM> <B>2</B>, 15.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="mkSpurs.html">mkSpurs</a></code>,  <code><a href="ccems-package.html">ccems</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(ccems)
+topology &lt;- list(  
+        heads=c("R1t0","R2t0"),  
+        sites=list(       
+                s=list(                     # s-site    thread #
+                        m=c("R1t1"),        # monomer      1
+                        d=c("R2t1","R2t2")  # dimer        2
+                )
+        )
+) 
+g &lt;- mkg(topology) 
+gridL &lt;- mkGrids(g) 
+print(gridL$chunk)
+topology &lt;- list(
+    heads=c("R1X0","R2X2","R4X4","R6X6"), 
+    sites=list(                # s-sites are already filled only in (j&gt;1)-mers 
+        a=list(  #a-site                                                    thread
+            m=c("R1X1"),                                            # monomer   1
+            d=c("R2X3","R2X4"),                                     # dimer     2
+            t=c("R4X5","R4X6","R4X7","R4X8"),                       # tetramer  3
+            h=c("R6X7","R6X8","R6X9","R6X10", "R6X11", "R6X12")     # hexamer   4
+        ), # tails of a-site threads are heads of h-site threads
+        h=list(   # h-site
+            m=c("R1X2"),                                            # monomer   5
+            d=c("R2X5", "R2X6"),                                    # dimer     6
+            t=c("R4X9", "R4X10","R4X11", "R4X12"),                  # tetramer  7
+            h=c("R6X13", "R6X14", "R6X15","R6X16", "R6X17", "R6X18")# hexamer   8
+        )
+    )
+)
+
+g &lt;- mkg(topology) 
+gridL &lt;- mkGrids(g,maxTotalPs=2) 
+print(gridL$chunk)
+
+gridL &lt;- mkGrids(g,maxTotalPs=4) 
+# the next line should be run separately since its output is large.
+# print(gridL$chunk)
+</pre>
+
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.03 <a href="00Index.html">Index</a>]</div>
+
+</body></html>

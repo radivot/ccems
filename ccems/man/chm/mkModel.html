@@ -1,0 +1,239 @@
+<html><head><title>Make Specific Model</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>mkModel(ccems)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   mkModel">
+<param name="keyword" value=" Make Specific Model">
+</object>
+
+
+<h2>Make Specific Model</h2>
+
+
+<h3>Description</h3>
+
+<p>
+This function takes a generic model input list <code>g</code> and augments it to include data and a specific hypothesis. The hypotheses come in the
+form of claims that certain Kj are so large that the data cannot discriminate them from being infinity, that certain Kd are so close in value
+that the data cannot distinguish them from being equal, and that the protein proportion that is active is so 
+close to 1 that the data cannot discriminate it from being 1. 
+Hypotheses regarding enzyme activity parameters k being essentially 
+equal to others on an average per occupied catalytic site basis can also be made.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre> mkModel(g,mid,d=NULL,Kjparams=NULL,Kdparams=NULL,Keq=NULL,
+        Kd2KjLst=NULL, pparams=c(p=-1,m1=-90), kparams=NULL,
+        keq=NULL, tightLogic=TRUE, 
+        transform=c("boxCox","relResid","none","sqrt","log"),lam=0.5,  
+        indx=NULL, nParams=NULL) </pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>g</code></td>
+<td>
+The output of <code>mkg</code>.  </td></tr>
+<tr valign="top"><td><code>mid</code></td>
+<td>
+The name of the specific hypothesis/model. The convention is that I stands for infinity, 
+J for a freely estimated spur graph edge, H for a freely estimated grid head node, 
+and D, E, F, etc. (i.e. other characters) for grid Kd that are equal
+to each other. In the latter case the same letter in two different positions 
+indicates equality between them; positions in model name strings are the binary reaction product
+node positions in <code>g$Z</code>, see <code><a href="mkg.html">mkg</a></code>). When k constraints exist they preceded by the 
+K name (a period separates them) and they follow  
+single thread curtain conventions (k constraints 
+for larger curtains remain to be worked out).
+The model name, which becomes <code>g$mid</code>,
+should not be confused with the name of the biochemical system <code>g$id</code>.    </td></tr>
+<tr valign="top"><td><code>d</code></td>
+<td>
+The data as a dataframe.  </td></tr>
+<tr valign="top"><td><code>Kjparams</code></td>
+<td>
+If the hypothesis is a spur model, this is a numeric 
+vector of its initial complete dissociation constant parameter values.     </td></tr>
+<tr valign="top"><td><code>Kdparams</code></td>
+<td>
+If the hypothesis is a generalized grid model these 
+are the initial dissociation constant parameter values: 
+head node spur edges are distinguished from thread 
+edges by not having <code>"_"</code> in their names.   </td></tr>
+<tr valign="top"><td><code>Keq</code></td>
+<td>
+This character vector specifies which Kd parameters are equal to each other. Names are followers 
+and values leaders in the sense of parameters constrained to track each other.  </td></tr>
+<tr valign="top"><td><code>Kd2KjLst</code></td>
+<td>
+This is a list of functions (see <code><a href="mkKd2Kj.html">mkKd2Kj</a></code>) that maps generalized 
+grid Kd parameters into full spur model Kj parameters. 
+An appropriate component of this list is assigned to <code>g$Kd2Kj</code>.
+Such functions are needed so that one generic full spur graph
+model, typically compiled in C, can be used by all of the specific hypotheses/models of the model space. </td></tr>
+<tr valign="top"><td><code>pparams</code></td>
+<td>
+The <code>p</code> component of this vector is the fraction of hub protein that is active. 
+The negative default of <code>-1</code> keeps it fixed at 1. 
+An initial value of +1 indicates that it is to be optimized. The <code>m1</code> component is
+monomer mass in kDa. 
+The default is 90 for the big (R1) subunit of ribonucleotide reductase (RNR).
+It is negative to stay fixed and
+positive to be the starting values in the parameter optimization.</td></tr>
+<tr valign="top"><td><code>kparams</code></td>
+<td>
+These are the enzyme activity parameter initial values, 
+if the data is reaction rate data, else it should be <code>NULL</code>.   </td></tr>
+<tr valign="top"><td><code>keq</code></td>
+<td>
+These are the equality constraints (if any) that are being placed on the enzyme activity parameters.  </td></tr>
+<tr valign="top"><td><code>tightLogic</code></td>
+<td>
+If <code>tightLogic</code> is true, instead of taking Kj to .001 as an approximation of infinitely tight binding, 
+logic is used to model Kj = 0 exactly. </td></tr>
+<tr valign="top"><td><code>transform</code></td>
+<td>
+If not <code>"none"</code> data and model are transformed before forming residuals. 
+This is used to stabilize enzyme activity variances. Other options are <code>"boxCox"</code> for Box-Cox
+transformations, in which case <code>lam</code> below is used as lambda, 
+<code>"relResid"</code> to divide the residuals by the data, 
+and square root and natural log transformations using <code>"sqrt"</code> and <code>"log"</code>, respectively.</td></tr>
+<tr valign="top"><td><code>lam</code></td>
+<td>
+The lambda parameter of the Box-Cox transformation, if used. </td></tr>
+<tr valign="top"><td><code>indx</code></td>
+<td>
+This is an integer index of the model.  The current
+hypothesis is the <code>indx</code>th model of the model space.  </td></tr>
+<tr valign="top"><td><code>nParams</code></td>
+<td>
+The number of model parameters, i.e. the first column of a <code>chunk</code> data frame. </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+Infinite initial Kj parameters remain fixed at <code>Inf</code> and are passed from R to C properly to eliminate corresponding polynomial terms in the 
+total concentration constraints.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+The input object <code>g</code> augmented to include the arguments <code>d</code>, <code>mid</code> and <code>indx</code> and the following:  
+</p>
+<table summary="R argblock">
+<tr valign="top"><td><code>params</code></td>
+<td>
+A dataframe specification of the parameter's initial values and whether they are optimized or fixed or 
+constrained to track others. Final value placeholders are initialized to initial values. </td></tr>
+<tr valign="top"><td><code>Kparams</code></td>
+<td>
+This is either <code>Kjparams</code> or <code>Kdparams</code>. 
+It is the one of the two which is not <code>NULL</code>. In cases of hybrids <code>Kdparams</code> is used.</td></tr>
+<tr valign="top"><td><code>codeS</code></td>
+<td>
+This is the name of the component of <code>Kd2KjLst</code> that is relevant to the current hypothesis. It 
+is a string of digits whose binary representation indicates which threads are infinite.  </td></tr>
+<tr valign="top"><td><code>Kd2Kj</code></td>
+<td>
+This is the component of <code>Kd2KjLst</code> that is 
+relevant to the current hypothesis, i.e. <code>Kd2Kj = Kd2KjLst[[codeS]]</code>. </td></tr>
+<tr valign="top"><td><code>fitS</code></td>
+<td>
+A string indicator of the status of the model fitting. It is initialized here to <code>"not fitted yet"</code>. </td></tr>
+<tr valign="top"><td><code>typeY</code></td>
+<td>
+The type of output. This is <code>m</code> for average mass and <code>v</code> for reaction velocity. </td></tr>
+<tr valign="top"><td><code>posY</code></td>
+<td>
+This is the column number of the output measurement in the data dataframe <code>d</code>. </td></tr>
+<tr valign="top"><td><code>posReactantsD</code></td>
+<td>
+These are the column numbers of the total reactant 
+concentrations (system inputs) in the data dataframe <code>d</code>.</td></tr>
+</table>
+<p>
+
+The value returned by this function is a model object that is ready to be fitted by <code>fitModel</code>.</p>
+
+<h3>Note</h3>
+
+<p>
+E-shaped topologies found in the BMC SB 2008 reference are not supported in <code>ccems</code>. 
+This work was supported by the National Cancer Institute (K25CA104791).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>
+Tom Radivoyevitch (txr24@case.edu)
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Radivoyevitch, T. (2008) Equilibrium model selection: dTTP induced R1 dimerization. <EM>BMC Systems Biology</EM> <B>2</B>, 15.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="mkg.html">mkg</a></code>, <code><a href="mkKd2Kj.html">mkKd2Kj</a></code> and <code><a href="fitModel.html">fitModel</a></code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(ccems)
+topology &lt;- list(  
+        heads=c("R1t0","R2t0"),  
+        sites=list(       
+                s=list(                     # s-site    thread #
+                        m=c("R1t1"),        # monomer      1
+                        d=c("R2t1","R2t2")  # dimer        2
+                )
+        )
+) 
+g &lt;- mkg(topology) 
+
+data(RNR)
+dRt &lt;- subset(RNR,(year==2001)&amp;(fg==1)&amp;(G==0)&amp;(t&gt;0),select=c(R,t,m,year))
+names(dRt)[1:2] &lt;- c("RT","tT") 
+
+## first a simple spur model
+mkModel(g,"IIIJ",dRt,Kjparams=c(R2t0=Inf, R1t1=Inf, R2t1=Inf, R2t2=1))
+Kmapping=mkKd2Kj(g)
+mdl=mkModel(g,"HDFF",dRt,Kdparams=c(R2t0=1, R0t0_t=1, R2t0_t=1, R2t1_t=1), 
+                  Keq=c(R2t1_t="R2t0_t"),Kd2KjLst=Kmapping) 
+fmdl &lt;- fitModel(mdl)
+
+## or mkGrids can be used to achieve the same thing as follows
+gridL &lt;- mkGrids(g,maxTotalPs=3)
+chunk &lt;- gridL$chunk
+Keqs &lt;- gridL$Keqs
+mdl &lt;- mkModel(g,"HDFF",dRt,Kdparams=chunk["HDFF",2:(g$nZ+1)], 
+       Keq=Keqs[["HDFF"]], Kd2KjLst=Kmapping,
+       pparams=chunk["HDFF","p",drop=FALSE],indx=chunk["HDFF","indx"])
+print(mdl)
+print(chunk)
+print(Keqs)
+
+</pre>
+
+
+
+<hr><div align="center">[Package <em>ccems</em> version 1.03 <a href="00Index.html">Index</a>]</div>
+
+</body></html>
