@@ -295,7 +295,7 @@
   ); 
   gObj=mapStrct(gObj)  # this was previously done in mkGrids
   gObj=mkZ(gObj)
-  library(odesolve); 
+# library(odesolve); 
 #  gObj=mkgC(gObj)
   if (TCC&!free) { gObj=mkgC(gObj); testgC(gObj)} else {
     if ((activity)&(gObj$singleThread)) gObj=mkRP(gObj)
